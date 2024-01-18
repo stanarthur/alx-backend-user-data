@@ -36,9 +36,17 @@ class Auth:
         # Returns False if path is in excluded_paths
 
     def authorization_header(self, request=None) -> str:
-        """It returns None
         """
-        return None
+        If request is None, returns None.
+        If request doesn’t contain the header key Authorization, returns None.
+        Otherwise, return the value of the header request Authorization.
+        """
+        if request is None or 'Authorization' not in request.headers:
+            """Returns None if request is None or
+            if request doesn’t contain the header key Authorization
+            """
+            return None
+        return request.headers['Authorization']
 
     def current_user(self, request=None) -> TypeVar('User'):
         """It returns None
