@@ -66,30 +66,32 @@ class BasicAuth(Auth):
             """
             return None
 
-    def extract_user_credentials(
-            self, decoded_base64_authorization_header: str) -> (str, str):
+    def extract_user_credentials(self, decoded_base64_authorization_header):
         """
-        Extracts the user email and password from the Base64 decoded value.
+        Extracts the user credentials from the Base64
+        decoded Authorization header.
 
         Args:
-            decoded_base64_authorization_header (str):
-            The decoded Base64 Authorization header.
+        decoded_base64_authorization_header:The decoded Base64
+        Authorization header.
 
         Returns:
-            tuple: A tuple containing user email and password.
+        Tuple[Optional[str], Optional[str]]:A tuple containing
+        user email and password.
         """
-        if (decoded_base64_authorization_header is None or
-                not isinstance(decoded_base64_authorization_header, str) or
-                ':' not in decoded_base64_authorization_header):
-            """
-            Return None, None if decoded_base64_authorization_header is None,
-            not a string, or doesn't contain : character or : is the first or
-            last character of decoded_base64_authorization_header
-            """
+        if decoded_base64_authorization_header is None:
             return None, None
 
-        user_email, user_password = decoded_base64_authorization_header.split(
-                                                                        ':', 1)
+        if not isinstance(decoded_base64_authorization_header, str):
+            return None, None
+
+        if ':' not in decoded_base64_authorization_header:
+            return None, None
+
+        user_email, *password_parts = (
+                decoded_base64_authorization_header.split(':', 1))
+        user_password = password_parts[0] if password_parts else None
+
         return user_email, user_password
 
     def user_object_from_credentials(
