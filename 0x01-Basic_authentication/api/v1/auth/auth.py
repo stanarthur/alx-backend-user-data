@@ -4,7 +4,7 @@ from typing import List, TypeVar
 
 
 class Auth:
-    """Checks if a path requires authentication.
+    """It checks if a path requires authentication.
     """
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """It returns False
