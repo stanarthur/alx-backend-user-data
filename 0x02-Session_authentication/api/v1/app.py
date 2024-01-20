@@ -9,7 +9,8 @@ from flask_cors import (CORS, cross_origin)
 import os
 
 from api.v1.auth.auth import Auth
-from api.v1.auth.basic_auth import BasicAuth  # Import BasicAuth
+from api.v1.auth.basic_auth import BasicAuth
+from api.v1.auth.session_auth import SessionAuth
 
 
 app = Flask(__name__)
@@ -21,30 +22,30 @@ if auth_type == "auth":
     auth = Auth()
 if auth_type == 'basic_auth':
     auth = BasicAuth()
+if auth_type == 'session_auth':
+    auth = SessionAuth()
 
 
 @app.before_request
-def before_request():
-    """ Before request handler
+def authenticate_user():
+    """Authenticates a user before processing a request.
     """
     if auth is None:
         return
+    excluded_paths = [
+        "/api/v1/status/",
+        "/api/v1/unauthorized/",
+        "/api/v1/forbidden/",
+    ]
 
-    excluded_paths = ['/api/v1/status/',
-                      '/api/v1/unauthorized/',
-                      '/api/v1/forbidden/']
-
-    if (request.path not in excluded_paths and
-            auth.require_auth(request.path, excluded_paths)):
-        if auth.authorization_header(request) is None:
+    if auth.require_auth(request.path, excluded_paths):
+        user = auth.current_user(request)
+        if auth.authorization_header(request) is None and \
+                auth.session_cookie(request) is None:
             abort(401)
-        request.current_user = auth.current_user(request)
-        """
-        Assign the result of auth.current_user(request)
-        to request.current_user
-        """
-        if request.current_user is None:
+        if user is None:
             abort(403)
+        request.current_user = user
 
 
 @app.errorhandler(404)
