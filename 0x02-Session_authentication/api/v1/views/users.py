@@ -122,13 +122,20 @@ def update_user(user_id: str = None) -> str:
     return jsonify(user.to_json()), 200
 
 
-@app_views.route('/users/me', methods=['GET'], strict_slashes=False)
-def get_authenticated_user() -> str:
-    """ GET /api/v1/users/me
-    Return:
-      - Authenticated User object JSON represented
-      - 404 if no authenticated user
-    """
-    if request.current_user is None:
+@app_views.route(
+        '/api/v1/users/<user_id>', methods=['GET'], strict_slashes=False)
+def get_user(user_id):
+    """ Retrieves a specific User """
+    if user_id == 'me' and request.current_user is None:
+        """ If the User ID is equal to the string 'me' and the User is not"""
         abort(404)
-    return jsonify(request.current_user.to_json()), 200
+
+    if user_id == 'me' and request.current_user is not None:
+        """ If the User ID is equal to the string 'me' and the User is not"""
+        return jsonify(request.current_user.to_dict()), 200
+
+    user = User.get(user_id)
+    """ If the User ID is not equal to the string 'me' """
+    if user is None:
+        abort(404)
+    return jsonify(user.to_dict()), 200

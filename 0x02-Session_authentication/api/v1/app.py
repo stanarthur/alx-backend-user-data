@@ -23,6 +23,7 @@ if auth_type == 'basic_auth':
     auth = BasicAuth()
 
 
+@app.before_request
 def before_request():
     """ Before request handler
     """
@@ -35,9 +36,13 @@ def before_request():
 
     if (request.path not in excluded_paths and
             auth.require_auth(request.path, excluded_paths)):
-        print("Authorization header:", auth.authorization_header(request))
+        if auth.authorization_header(request) is None:
+            abort(401)
         request.current_user = auth.current_user(request)
-        print("Current user:", request.current_user)
+        """
+        Assign the result of auth.current_user(request)
+        to request.current_user
+        """
         if request.current_user is None:
             abort(403)
 
