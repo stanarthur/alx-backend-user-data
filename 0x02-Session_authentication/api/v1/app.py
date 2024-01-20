@@ -48,6 +48,17 @@ def authenticate_user():
         request.current_user = user
 
 
+def require_auth():
+    excluded_paths = ['/api/v1/auth_session/login/']
+
+    if request.path in excluded_paths:
+        return
+
+    if (auth.authorization_header(request) is None and
+            auth.session_cookie(request) is None):
+        abort(401)
+
+
 @app.errorhandler(404)
 def not_found(error) -> str:
     """ Not found handler
