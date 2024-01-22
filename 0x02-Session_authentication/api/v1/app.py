@@ -27,7 +27,7 @@ if auth_type == 'session_auth':
 
 
 @app.before_request
-def authenticate_user():
+def before_request():
     """Authenticates a user before processing a request.
     """
     if auth is None:
@@ -39,20 +39,18 @@ def authenticate_user():
         "/api/v1/auth_session/login/"
     ]
 
-    # if auth.require_auth(request.path, excluded_paths):
-    #     user = auth.current_user(request)
-    #     if auth.authorization_header(request) is None and \
-    #             auth.session_cookie(request) is None:
-    #         abort(401)
-    #     if user is None:
-    #         abort(403)
-    #     request.current_user = user
     if request.path in excluded_paths:
         return
+    
+    if auth.authorization_header(request) is None and \
+            auth.session_cookie(request) is None:
+        abort(403)
 
-    if (auth.authorization_header(request) is None and
-            auth.session_cookie(request) is None):
+    user = auth.current_user(request)
+    if user is None:
         abort(401)
+
+    request.current_user = user
 
 
 @app.errorhandler(404)
