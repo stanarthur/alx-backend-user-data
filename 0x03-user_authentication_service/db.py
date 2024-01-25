@@ -11,6 +11,8 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from user import Base, User
 
+Base = declarative_base()
+
 
 class DB:
     """DB class
